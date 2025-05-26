@@ -4,7 +4,7 @@ from datetime import datetime
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from typing import Dict, Text, Any, List
-from rasa_sdk.events import SlotSet # Импортируем SlotSet
+from rasa_sdk.events import SlotSet 
 
 DB_PATH = "user_memory.db"
 
