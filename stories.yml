@@ -3,6 +3,7 @@ stories:
 - story: Weather request
   steps:
   - intent: greet
+  - action: action_load_user_memory
   - action: utter_greet
   - intent: get_weather
   - action: action_get_weather
@@ -27,15 +28,36 @@ stories:
   - intent: inform
   - action: action_analyze_sentiment
 
-- story: Запрос имени и приветствие
+- story: Запрос имени
   steps:
-  - intent: ask_name
-  - action: utter_ask_name
-  - intent: tell_name
-    entities:
-      - name: Даша  # Важно указывать пример сущности
-  - action: action_remember_name # Запоминаем имя
-  - action: action_greet_with_name # Приветствуем пользователя
+    - intent: ask_name
+    - action: utter_ask_name
+    - intent: tell_name
+    - action: action_remember_name
+
+- story: Запрос имени
+  steps:
+    - intent: "ask_name"
+    - action: "utter_ask_name"
+    - intent: "tell_name"
+      entities:
+        - name: "name"
+    - action: "action_remember_name"
+    - action: "action_get_name"  # Или action: "utter_greet", если хотите поприветствовать
+
+- story: Сохранение имени пользователя
+  steps:
+    - intent: tell_name
+      entities:
+        - name
+    - action: action_save_user_memory
+
+- story: Сохранение любимой темы
+  steps:
+    - intent: tell_favorite_topic
+      entities:
+        - favorite_topic
+    - action: action_save_user_memory
 
 - story: handle thank you
   steps:
@@ -51,28 +73,3 @@ stories:
   steps:
   - intent: what_can_you_do
   - action: utter_what_can_you_do
-
-- story: Save and load user information after greeting and providing details
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: tell_name
-    entities:
-      - name: Даша
-  - action: action_remember_name
-  - action: action_greet_with_name  #  Приветствуем пользователя сразу
-  - intent: tell_favorite_topic
-    entities:
-      - favorite_topic: программирование
-  - action: action_save_user_memory  # Явно сохраняем информацию
-  - action: utter_memory_saved       # Уведомляем пользователя
-  - intent: load_info
-  - action: action_load_user_memory  # Загружаем информацию
-
-- story: User tells favorite topic
-  steps:
-    - intent: tell_favorite_topic
-      entities:
-        - favorite_topic: музыка
-    - action: action_save_user_memory # Сохраняем данные, но нужно чтобы action принимал favorite_topic
-    - action: utter_something_about_topic  # Создаем шаблон
