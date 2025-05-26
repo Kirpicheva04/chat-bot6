@@ -43,7 +43,7 @@ stories:
       entities:
         - name: "name"
     - action: "action_remember_name"
-    - action: "action_get_name"  # Или action: "utter_greet", если хотите поприветствовать
+    - action: "action_get_name" 
 
 - story: Сохранение имени пользователя
   steps:
