@@ -20,7 +20,7 @@ intents:
 entities:
   - city
   - name
-  - favorite_topic # Добавлено
+  - favorite_topic 
 
 slots:
   city:
