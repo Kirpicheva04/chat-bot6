@@ -1,0 +1,78 @@
+version: "3.1"
+stories:
+- story: Weather request
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: get_weather
+  - action: action_get_weather
+
+- story: Goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: user asks for search
+  steps:
+  - intent: search
+  - action: action_web_search
+
+- story: Запрос анекдота
+  steps:
+  - intent: ask_music
+  - action: action_random_song
+
+- story: Анализ тональности сообщения
+  steps:
+  - intent: inform
+  - action: action_analyze_sentiment
+
+- story: Запрос имени и приветствие
+  steps:
+  - intent: ask_name
+  - action: utter_ask_name
+  - intent: tell_name
+    entities:
+      - name: Даша  # Важно указывать пример сущности
+  - action: action_remember_name # Запоминаем имя
+  - action: action_greet_with_name # Приветствуем пользователя
+
+- story: handle thank you
+  steps:
+  - intent: thank_you
+  - action: utter_you_are_welcome
+
+- story: handle how are you
+  steps:
+  - intent: how_are_you
+  - action: utter_how_are_you
+
+- story: handle what can you do
+  steps:
+  - intent: what_can_you_do
+  - action: utter_what_can_you_do
+
+- story: Save and load user information after greeting and providing details
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: tell_name
+    entities:
+      - name: Даша
+  - action: action_remember_name
+  - action: action_greet_with_name  #  Приветствуем пользователя сразу
+  - intent: tell_favorite_topic
+    entities:
+      - favorite_topic: программирование
+  - action: action_save_user_memory  # Явно сохраняем информацию
+  - action: utter_memory_saved       # Уведомляем пользователя
+  - intent: load_info
+  - action: action_load_user_memory  # Загружаем информацию
+
+- story: User tells favorite topic
+  steps:
+    - intent: tell_favorite_topic
+      entities:
+        - favorite_topic: музыка
+    - action: action_save_user_memory # Сохраняем данные, но нужно чтобы action принимал favorite_topic
+    - action: utter_something_about_topic  # Создаем шаблон
