@@ -3,9 +3,10 @@ import json
 from datetime import datetime
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet
+from typing import Dict, Text, Any, List
+from rasa_sdk.events import SlotSet # Импортируем SlotSet
 
-DB_PATH = "memory.db"
+DB_PATH = "user_memory.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -26,48 +27,33 @@ class ActionSaveUserMemory(Action):
     def name(self):
         return "action_save_user_memory"
 
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         init_db()
         user_id = tracker.sender_id
         name = tracker.get_slot("name")
-        favorite_topic = tracker.get_slot("favorite_topic") # Получаем любимую тему из слота
-
-        print(f"ActionSaveUserMemory: Сохраняем имя: {name}, любимую тему: {favorite_topic}")
-
-        extra_data = {}  # Для будущих расширений
-
+        topic = tracker.get_slot("favorite_topic")
+        extra_data = {}
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                INSERT INTO user_memory(user_id, name, favorite_topic, last_seen, extra)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(user_id) DO UPDATE SET
-                  name=excluded.name,
-                  favorite_topic=excluded.favorite_topic,
-                  last_seen=excluded.last_seen,
-                  extra=excluded.extra;
-            """, (
-                user_id,
-                name,
-                favorite_topic,
-                datetime.utcnow().isoformat(),
-                json.dumps(extra_data)
-            ))
-            conn.commit()
-            dispatcher.utter_message(text="Я запомнил вашу информацию.")
-        except Exception as e:
-            print(f"Ошибка при сохранении в БД: {e}")
-            dispatcher.utter_message(text="Произошла ошибка при сохранении информации.")
-        finally:
-            conn.close()
+        cursor.execute("""
+            INSERT INTO user_memory(user_id, name, favorite_topic, last_seen, extra)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+              name=excluded.name,
+              favorite_topic=excluded.favorite_topic,
+              last_seen=excluded.last_seen,
+              extra=excluded.extra;
+        """, (user_id, name, topic, datetime.utcnow().isoformat(), json.dumps(extra_data)))
+        conn.commit()
+        conn.close()
+        dispatcher.utter_message(text="Буду знать!")
         return []
 
 class ActionLoadUserMemory(Action):
     def name(self):
         return "action_load_user_memory"
 
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         init_db()
         user_id = tracker.sender_id
         conn = sqlite3.connect(DB_PATH)
@@ -75,16 +61,12 @@ class ActionLoadUserMemory(Action):
         cursor.execute("SELECT name, favorite_topic, extra FROM user_memory WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
         conn.close()
-
+        events = [] # Список событий, которые мы будем возвращать
         if row:
-            name, favorite_topic, extra_json = row
-            print(f"ActionLoadUserMemory: Загружено имя: {name}, любимая тема: {favorite_topic}")
-            #message = f"Привет{', ' + name if name else ''}! Тебе нравится {favorite_topic if favorite_topic else 'что-то интересное'}."
-            #dispatcher.utter_message(text=message) # приветствие в actions это плохо
-            return [
-                SlotSet("name", name),
-                SlotSet("favorite_topic", favorite_topic) # Устанавливаем слот для любимой темы
-            ]
+            name, topic, extra_json = row
+            dispatcher.utter_message(text=f"Привет, {', ' + name if name else ''}! Я помню, что ты любишь {topic if topic else ''}.")
+            events.append(SlotSet("name", name))
+            events.append(SlotSet("favorite_topic", topic))
         else:
-            dispatcher.utter_message(text="Привет! Рад познакомиться.")
-            return []
+            dispatcher.utter_message(text="Привет! Меня зовут Ботик.")
+        return events # Возвращаем список событий
