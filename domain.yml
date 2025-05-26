@@ -15,8 +15,7 @@ intents:
   - how_are_you
   - what_can_you_do
   - tell_favorite_topic
-  - save_info # Добавлено
-  - load_info # Добавлено
+
 
 entities:
   - city
@@ -83,14 +82,7 @@ responses:
     - text: "Всё хорошо, спасибо, что спросили! Как у тебя?"
   utter_what_can_you_do:
     - text: "Я могу:\n- рассказывать анекдоты\n- узнавать погоду\n- подсказать время\n- найти что-нибудь в интернете\n- посчитать пример\nЧем могу помочь?"
-  utter_memory_saved:
-    - text: "Я запомню."
-  utter_memory_loaded:
-    - text: "Я вспомнил о вас кое-что!"
-  utter_no_memory:
-    - text: "Я еще ничего не знаю о вас."
-  utter_something_about_music:
-    - text: "Это здорово!"
+
 
 actions:
   - action_get_time
@@ -100,7 +92,6 @@ actions:
   - action_web_search
   - action_analyze_sentiment
   - action_remember_name
-  # - action_get_name  # Удаляем это, если оно больше не используется
-  - action_greet_with_name # Добавляем это
+  - action_get_name
   - action_save_user_memory
   - action_load_user_memory
