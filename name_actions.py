@@ -14,8 +14,8 @@ class ActionRememberName(Action): # Это не нужно, т.к. имя не �
         lang = domain.get("config", {}).get("language", "ru")
         text = tracker.latest_message.get("text")
         # doc = nlp(text) # не нужно, если используем извлечение из NLU
-        # name = next((ent.text for ent in doc.ents if ent.label_ == "PER"), None) # не нужно, если используем извлечение из NLU
-        name = tracker.get_slot("name") # Получаем имя из слота, если оно было извлечено из NLU
+        # name = next((ent.text for ent in doc.ents if ent.label_ == "PER"), None)
+        name = tracker.get_slot("name") 
         if not name:
             dispatcher.utter_message(response="utter_ask_name")
             return [] # если имени нет, просим его ввести
